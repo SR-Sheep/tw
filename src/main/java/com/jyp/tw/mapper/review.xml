@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="review">	
+	<select id="selectReviewScore" parameterType="int" resultType="Review">
+		SELECT count(r.score) reviewNum,NVL(sum(r.score)/count(r.score)*20,0) score
+		FROM review r,(SELECT op.no
+						FROM product p, order_prod op
+						WHERE p.no=op.product_no
+						AND p.no=#{no}) op
+		WHERE r.order_no=op.no
+	</select>
+
+	<!--21-03-08 19:21 양 한 상품의 리뷰 리스트 가져오기 -->
+	<select id="selectListByProductNo" parameterType="int" resultType="Review">
+		SELECT receive_date receiveDate,count,o.product_no productNo,option_no optionNo,payment_no paymentNo,
+			   LISTAGG(po.name,',') WITHIN GROUP(ORDER BY po.name) optionName,
+			   r.no,o.no orderNo, score, content, blind, r.regdate,
+			   m.name name, m.profile profile,re.contents replyContents
+		FROM (SELECT * FROM order_prod WHERE product_no=#{no}) o,
+			 (SELECT * FROM prod_option WHERE product_no=#{no}) po,
+			  review r,payment pay,member m, reply re
+		WHERE o.no=r.order_no AND blind='Y'AND pay.no=o.payment_no 
+			  AND pay.member_no=m.no AND re.review_no(+)=r.no AND po.product_no=o.product_no 
+		GROUP BY receive_date,count,o.product_no,option_no,payment_no,
+				 r.no,o.no,score,content,blind,r.regdate,m.name,m.profile,re.contents
+	</select>
+	
+	<!--21-03-26 19:21 양 옵션이 없는 경우 한 상품의 리뷰 리스트 가져오기 -->
+	<select id="selectListByProductNoNoOption" parameterType="int" resultType="Review">
+		SELECT receive_date receiveDate,count,o.product_no productNo,option_no optionNo,payment_no paymentNo,
+			   r.no,o.no orderNo, score, content, blind, r.regdate,
+			   m.name name, m.profile profile,re.contents replyContents
+		FROM (SELECT * FROM order_prod WHERE product_no=#{no}) o,
+			  review r,payment pay,member m, reply re
+		WHERE o.no=r.order_no AND blind='Y'AND pay.no=o.payment_no 
+			  AND pay.member_no=m.no AND re.review_no(+)=r.no
+	</select>
+	
+	<select id="selectListByProductNoPage" parameterType="PageVO" resultType="Review">
+		SELECT receiveDate,count,productNo,optionNo,paymentNo,optionName,no,orderNo,score,content,blind,regdate,name,profile,replyContents
+		FROM(SELECT receiveDate,count,productNo,optionNo,paymentNo,optionName,no,orderNo,score,content,blind,regdate,name,profile,replyContents,rownum r
+			 FROM(SELECT receive_date receiveDate,count,o.product_no productNo,option_no optionNo,payment_no paymentNo,
+					   LISTAGG(po.name,',') WITHIN GROUP(ORDER BY po.name) optionName,
+					   r.no,o.no orderNo, score, content, blind, r.regdate,
+					   m.name name, m.profile profile,re.contents replyContents
+				  FROM (SELECT * FROM order_prod WHERE product_no=#{no}) o,
+					   (SELECT * FROM prod_option WHERE product_no=#{no}) po,
+					    review r,payment pay,member m, reply re
+				  WHERE o.no=r.order_no AND po.product_no=o.product_no AND blind='Y'AND
+					    pay.no=o.payment_no AND pay.member_no=m.no AND re.review_no(+)=r.no
+				  ORDER BY r.regdate
+				  GROUP BY receive_date,count,o.product_no,option_no,payment_no,
+						r.no,o.no,score,content,blind,r.regdate,m.name,m.profile,re.contents
+			 	)
+		 	)
+	 	WHERE r BETWEEN #{start} AND #{end} 
+	</select>
+	
+	<!-- 0303 오세훈 -->
+	<select id="selectReviewList" parameterType="PageVO" resultType="Review">
+		SELECT DISTINCT no, orderNo, score, content, blind, regdate, productNo, productName, memberNo,memberId, replyReivewNo
+		FROM (SELECT no, orderNo, score, content, blind, regdate, productNo, productName, memberNo,memberId, replyReivewNo, rownum r
+	  		  FROM (SELECT rv.no no, rv.order_no orderNo, rv.score score, rv.content content, rv.blind blind, rv.regdate regdate, pd.no productNo, pd.name productName, pm.member_no memberNo,
+	   			   		   mb.id memberId, nvl(rpc.reviewNo,0) replyReivewNo
+	  				FROM review rv, order_prod op, payment pm, product pd, member mb, 
+						 (SELECT nvl(rp.review_no,0) reviewNo
+						  FROM reply rp, review rv
+						  WHERE rp.review_no(+) = rv.no) rpc
+	  				WHERE op.no = rv.order_no AND op.payment_no = pm.no AND pd.no = op.product_no AND mb.no = pm.member_no
+						  AND rv.no = rpc.reviewNo(+)
+	  				ORDER BY 1))
+		WHERE r BETWEEN #{start} AND #{end}
+	</select>
+	<!-- 0303 오세훈 -->
+	<select id="selectReviewByAdmin" parameterType="int" resultType="Review">
+		SELECT rv.no no, rv.order_no orderNo, rv.score score, rv.content content, rv.blind blind, rv.regdate regdate,
+	   		   mb.id memberId, pd.name productName, pm.no paymentNo, rp.contents replyContents
+		FROM review rv, order_prod op, payment pm, member mb, product pd, reply rp
+		WHERE rv.no = #{no} AND rv.order_no = op.no AND pm.no = op.payment_no AND mb.no = pm.member_no
+	  		  AND pd.no = op.product_no AND rp.review_no(+) = rv.no
+	</select>
+
+</mapper>
+

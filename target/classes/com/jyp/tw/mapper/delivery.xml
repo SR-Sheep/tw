@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="delivery">	
+	<select id="selectdeliveryName" parameterType="int" resultType="Delivery">
+		SELECT d.name
+		FROM delivery d,member m
+		WHERE m.no=d.member_no
+		AND m.no=#{no}
+	</select>
+	
+	<select id="selectBasicDet" parameterType="int" resultType="Delivery">
+		SELECT no,name,receiver,address,address_detail addressDetail,postcode
+		FROM delivery
+		WHERE base_det = 'Y'
+		AND member_no = #{no}
+	</select>
+	
+	<select id="selectDeliveryFillter" parameterType="Delivery" resultType="Delivery">
+		SELECT no,name,receiver,address,address_detail addressDetail,postcode
+		FROM delivery
+		WHERE name = #{name}
+		AND member_no = #{memberNo}
+	</select>
+	
+	<select id="selectOne" parameterType="Delivery" resultType="Delivery">
+		SELECT no, member_no memberNo, name, receiver, address, address_detail addressDetail,
+		phone, base_det baseDet, postcode, regdate
+		FROM delivery
+		WHERE member_no = #{memberNo} AND no = #{no}
+	</select>
+
+	<!-- 21.03.03  17:31 김기현 -->
+	<update id="update" parameterType="Delivery">
+		UPDATE delivery
+		SET name = #{name}, receiver = #{receiver}, address = #{address}, address_detail = #{addressDetail}, 
+		phone = #{phone}, base_det = #{baseDet}, postcode = #{postcode}, regdate = systimestamp
+		WHERE no = #{no}
+	</update>
+
+
+	<!-- 21.03.03 17:19 김기현 -->
+	<delete id="delete" parameterType="int">
+		DELETE delivery
+		WHERE no = #{no}
+	</delete>
+	
+	<!-- 21.03.03 김기현 -->
+	<insert id="insert" parameterType="Delivery">
+		<selectKey keyProperty="no" order="BEFORE" resultType="int">
+			SELECT delivery_seq.nextval
+			FROM dual
+		</selectKey>
+		INSERT INTO delivery(no, member_no, name, receiver, address,
+		address_detail, phone, base_det, postcode, regdate)
+		VALUES(#{no},#{memberNo},#{name},#{receiver},#{address},#{addressDetail},
+		#{phone},#{baseDet},#{postcode},systimestamp)
+	</insert>
+	
+	<!-- 21.03.03 김기현 -->
+	<select id="selectList" parameterType="int" resultType="Delivery">
+		SELECT no, member_no memberNo, name, receiver, address, address_detail addressDetail,
+				phone, base_det baseDet, postcode, regdate
+		FROM delivery
+		WHERE member_no = #{memberNo}
+		ORDER BY base_det DESC
+	</select>
+
+</mapper>
+

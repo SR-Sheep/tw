@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="product">	
+	<select id="selectGiftItem" parameterType="int" resultType="Product">
+		SELECT p.no,p.name,p.price,p.representImg,p.stock,p.deliveryType,p.saleCount, p.regdate,p.discountRate
+		FROM contents_prod cp,(SELECT p.no,p.name,p.price,p.represent_img representImg, p.stock, p.delivery_type deliveryType, p.sale_count saleCount, p.regdate, d.discount_rate discountRate
+								FROM product p,discount d
+								WHERE p.no = d.no(+)) p
+		WHERE cp.product_no = p.no
+		AND cp.contents_no = #{no}
+	</select>
+	
+	<select id="selectCartList" parameterType="int" resultType="Product">
+		SELECT p.no,p.name,p.price,p.representImg, p.stock,p.deliveryType, p.saleCount,p.regdate,p.count,NVL(p.discountRate,0) discountRate, NVL(p.deliveryPrice,0) deliveryPrice, NVL(p.deliveryOption,0) deliveryOption,po.name optionName,p.cartListNo,po.no optionNo
+		FROM prod_option po,(SELECT p.no,p.name,p.price,p.representImg, p.stock,p.deliveryType, p.saleCount,p.regdate,c.count count,p.discountRate, p.deliveryPrice, p.deliveryOption,c.option_no,c.no cartListNo
+		FROM  cartlist c,(SELECT p.no,p.name,p.price,p.represent_img representImg, p.stock, p.delivery_type deliveryType, p.sale_count saleCount, p.regdate, d.discount_rate discountRate, dt.delivery_price deliveryPrice, dt.delivery_option deliveryOption
+										FROM product p,discount d,delivery_type dt
+										WHERE p.no = d.no(+)
+										AND dt.no(+)=p.no) p
+		WHERE p.no=c.product_no
+		AND c.member_no=#{no}) p
+		WHERE po.no=p.option_no
+	</select>
+	<select id="selectOneCartList" parameterType="Product" resultType="Product">
+		SELECT p.no,p.name,p.price,p.representImg, p.stock,p.deliveryType, p.saleCount,p.regdate,p.count,NVL(p.discountRate,0) discountRate, NVL(p.deliveryPrice,0) deliveryPrice, NVL(p.deliveryOption,0) deliveryOption,po.name optionName,p.cartListNo
+		FROM prod_option po,(SELECT p.no,p.name,p.price,p.representImg, p.stock,p.deliveryType, p.saleCount,p.regdate,c.count count,p.discountRate, p.deliveryPrice, p.deliveryOption,c.option_no,c.no cartListNo
+		FROM  cartlist c,(SELECT p.no,p.name,p.price,p.represent_img representImg, p.stock, p.delivery_type deliveryType, p.sale_count saleCount, p.regdate, d.discount_rate discountRate, dt.delivery_price deliveryPrice, dt.delivery_option deliveryOption
+										FROM product p,discount d,delivery_type dt
+										WHERE p.no = d.no(+)
+										AND dt.no(+)=p.no) p
+		WHERE p.no=c.product_no
+		AND c.member_no=#{no}) p
+		WHERE po.no=p.option_no
+		AND p.cartlistNo=#{cartListNo}
+	</select>
+	
+	
+	<!--21-03-04 11:57 양성룡 한 상품의 정보 가져오기 -->
+	<select id="selectOne" parameterType="int" resultType="Product">
+	SELECT p.no, name,price, represent_img representImg, stock, delivery_type deliveryType,
+		   sale_count saleCount,p.regdate,count(r.content) reviewCount
+    FROM product p, order_prod o,review r
+    WHERE p.no=o.product_no(+) AND o.no = r.order_no(+) AND p.no=#{no}
+    GROUP BY p.no,name,price,represent_img,stock,delivery_type,sale_count,p.regdate
+	</select>
+	
+	<!--//21-03-04 18:20 양성룡 상품리스트 페이지  -->
+	<select id="selectList" parameterType="PageVO" resultType="Product">
+SELECT no,name,price,representImg,stock,deliveryType,saleCount,regdate,reviewCount,score,discountRate
+FROM(SELECT no,name,price,represent_img representImg,stock,delivery_type deliveryType, sale_count saleCount,regdate,reviewCount,score,discountRate,rownum r
+FROM (SELECT p.*, NVL(reviewCount,0) reviewCount, NVL(score,-1) score, NVL(discountRate,0) discountRate
+FROM product p,
+(SELECT o.product_no, count(*) reviewCount, avg(score) score
+FROM order_prod o, review r
+WHERE o.no=r.order_no
+GROUP BY o.product_no) o,
+(SELECT no,discount_rate discountRate
+FROM discount
+WHERE sysdate BETWEEN start_date AND end_date) d
+WHERE p.no=o.product_no(+) AND p.no=d.no(+)
+ORDER BY 
+<choose>
+<when test='filter == "s"'>
+sale_count DESC
+</when>
+<when test='filter == "r"'>
+reviewCount DESC
+</when>
+<when test='filter == "hp"'>
+price DESC
+</when>
+<when test='filter == "lp"'>
+price ASC
+</when>
+<otherwise>
+regdate ASC
+</otherwise>
+</choose>
+))
+WHERE r BETWEEN #{start} AND #{end}	
+	</select>
+	
+	<!--//21-03-04 18:52 양성룡 상품 총 갯수 가져오기  -->
+	<select id="selectTotal" resultType="int">
+	SELECT count(*)
+	FROM product
+	</select>
+	
+	<insert id="insert" parameterType="Product">
+		<selectKey keyProperty="no" order="BEFORE" resultType="int">
+			SELECT product_seq.nextval
+			FROM dual
+		</selectKey>
+		INSERT INTO product
+		VALUES(#{no},#{name},#{price},#{representImg},#{stock},#{deliveryType},#{saleCount},systimestamp)
+	</insert>
+	<select id="selectListPicker" parameterType="ProductFilter" resultType="Product">
+		SELECT	 no, name, represent_img representImg, stock, price, delivery_type deliveryType,
+				 sale_count saleCount, regdate
+		 FROM 	product
+		 WHERE (regdate between #{fromDate} AND #{toDate})
+		 <if test="keywords!=null">
+		 	AND(
+		 	<foreach collection="keywords" item="keyword" open="(" close=")" separator="OR">
+ 				name like #{keyword}
+			</foreach>
+			)
+		 </if> 
+		 ORDER BY no
+	</select>
+
+</mapper>
+

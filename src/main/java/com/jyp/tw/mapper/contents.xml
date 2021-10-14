@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contents">	
+	
+	<select id="selectContent" parameterType="int" resultType="Contents">
+		SELECT c.no,c.content_img contentImg, c.title, c.description, c.state, c.regdate,cp.countNum
+		FROM contents c,(SELECT count(cp.no) countNum,cp.contents_no contentsNo
+						FROM CONTENTS c, CONTENTS_PROD cp
+						WHERE  c.no=cp.contents_no
+						GROUP BY cp.contents_no) cp
+		WHERE  c.no=cp.contentsno
+		AND c.no=#{no}
+		AND c.STATE = 'Y'
+	</select>
+	
+	<select id="selectTotalContents" resultType="int">
+		SELECT count(*)
+		FROM contents
+	</select>
+	
+	<select id="selectOnContents" resultType="int">
+		SELECT count(*)
+		FROM contents
+		WHERE state = 'Y'
+	</select>
+	
+	<select id="selectContentsList" resultType="Contents" parameterType="int">
+		SELECT no, content_img contentImg, title, description, state, regdate
+		<!-- ,(SELECT count(*) FROM contents_prod WHERE contents_no = #{no}) prodCount -->
+		FROM contents
+		ORDER BY 1
+	</select>
+
+</mapper>
+

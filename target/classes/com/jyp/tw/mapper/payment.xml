@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="payment">	
+	<insert id="insertPay" parameterType="Payment">
+		<selectKey keyProperty="no" resultType="int" order="BEFORE">
+			select payment_seq.nextval
+			from dual
+		</selectKey>
+	
+		INSERT INTO payment(no,point_no,member_no,regdate)
+		VALUES(#{no},#{pointNo},#{memberNo},systimestamp)
+	</insert>	
+	<select id="selectPaymentList" resultType="Payment"
+		parameterType="int">
+		SELECT no, point_no pointNo, member_no memberNo, regdate
+		FROM payment
+		WHERE member_no = #{memberNo}
+		ORDER BY 4 ASC
+	</select>
+
+	<select id="selectList" parameterType="PageVO"
+		resultType="Payment">
+		SELECT no, pointNO, memberNo, regdate, rownum r
+		FROM(SELECT
+		no, pointNO, memberNo, regdate, rownum r
+		FROM(SELECT no, point_no
+		pointNo, member_no memberNo, regdate
+		FROM payment
+		WHERE member_no =
+		#{memberNo}
+		ORDER BY 4 ASC))
+		WHERE r BETWEEN #{start} AND #{end}
+	</select>
+
+	<select id="selectTotal" resultType="int" parameterType="int">
+		SELECT
+		COUNT(*)
+		FROM payment
+		WHERE member_no = #{memberNo}
+	</select>
+
+</mapper>
+

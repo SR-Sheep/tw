@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="productImg">	
+	
+	<!--21-03-03 17:54 양성룡 한상품의 서브 이미지 가져오기  -->
+	<select id="selectListBySub" parameterType="int" resultType="ProductImg">
+		SELECT no, product_no productNo, name, state, regdate	
+		FROM product_img
+		WHERE product_no=#{productNo} AND state='S'
+	</select>
+	
+	
+	<!--21-03-03 17:54 양성룡 한상품의 설명 이미지 가져오기  -->
+	<select id="selectListByDetail" parameterType="int" resultType="ProductImg">
+		SELECT no, product_no productNo, name, state, regdate	
+		FROM product_img
+		WHERE product_no=#{productNo} AND state='D' 
+	</select>
+
+</mapper>
+

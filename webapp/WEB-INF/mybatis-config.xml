@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration 
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+<settings>
+<setting name="jdbcTypeForNull" value="NULL" />
+</settings>
+
+	<typeAliases>
+		<typeAlias type="com.jyp.tw.vo.Admin" alias="Admin"/>
+		<typeAlias type="com.jyp.tw.vo.Cartlist" alias="Cartlist"/>
+		<typeAlias type="com.jyp.tw.vo.Category" alias="Category"/>
+		<typeAlias type="com.jyp.tw.vo.Contents" alias="Contents"/>
+		<typeAlias type="com.jyp.tw.vo.ContentsProd" alias="ContentsProd"/>
+		<typeAlias type="com.jyp.tw.vo.Delivery" alias="Delivery"/>
+		<typeAlias type="com.jyp.tw.vo.DeliveryInfo" alias="DeliveryInfo"/>
+		<typeAlias type="com.jyp.tw.vo.DeliveryType" alias="DeliveryType"/>
+		<typeAlias type="com.jyp.tw.vo.Discount" alias="Discount"/>
+		<typeAlias type="com.jyp.tw.vo.Member" alias="Member"/>
+		<typeAlias type="com.jyp.tw.vo.OrderProd" alias="OrderProd"/>
+		<typeAlias type="com.jyp.tw.vo.Payment" alias="Payment"/>
+		<typeAlias type="com.jyp.tw.vo.PointHis" alias="PointHis"/>
+		<typeAlias type="com.jyp.tw.vo.ProdCategory" alias="ProdCategory"/>
+		<typeAlias type="com.jyp.tw.vo.ProdOption" alias="ProdOption"/>
+		<typeAlias type="com.jyp.tw.vo.Product" alias="Product"/>
+		<typeAlias type="com.jyp.tw.vo.ProductImg" alias="ProductImg"/>
+		<typeAlias type="com.jyp.tw.vo.Reply" alias="Reply"/>
+		<typeAlias type="com.jyp.tw.vo.Review" alias="Review"/>
+		<typeAlias type="com.jyp.tw.vo.ReviewImage" alias="ReviewImage"/>
+		<typeAlias type="com.jyp.tw.vo.PageVO" alias="PageVO"/>
+		<typeAlias type="com.jyp.tw.vo.ProductFilter" alias="ProductFilter"/>
+	</typeAliases>
+
+	<!-- mapper 경로 설정 -->
+	<mappers>
+		<mapper resource="com/jyp/tw/mapper/admin.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/cartlist.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/category.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/contents.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/contentsProd.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/delivery.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/deliveryInfo.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/deliveryType.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/discount.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/member.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/orderProd.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/payment.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/pointHis.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/prodCategory.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/prodOption.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/product.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/productImg.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/reply.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/review.xml"></mapper>
+		<mapper resource="com/jyp/tw/mapper/reviewImage.xml"></mapper>
+	</mappers>
+
+</configuration>
+
+

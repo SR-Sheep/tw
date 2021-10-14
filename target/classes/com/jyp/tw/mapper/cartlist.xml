@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cartlist">	
+	<!--21-03-27 18:20 양성룡 장바구니 추가  -->
+	<insert id="cartInsert" parameterType="Cartlist">
+		INSERT INTO cartlist(no,member_no,product_no,option_no,count,regdate)
+		VALUES (CARTLIST_SEQ.nextval,#{memberNo},#{productNo},#{optionNo},#{count},systimestamp)
+	</insert>
+	
+	<!--21-03-27 19:13 양성룡 장바구니 품목 조회  -->
+	<select id="cartSelectOne" parameterType="Cartlist" resultType="Cartlist">
+		SELECT *
+		FROM cartlist
+		WHERE member_no=#{memberNo} AND product_no=#{productNo} AND option_no=#{optionNo}
+	</select>
+	
+	<!--21-03-28 18:58 양성룡 옵션 없을 시 장바구니 추가  -->
+	<insert id="cartInsertNoOption" parameterType="Cartlist">
+		INSERT INTO cartlist(no,member_no,product_no,count,regdate)
+		VALUES (CARTLIST_SEQ.nextval,#{memberNo},#{productNo},#{count},systimestamp)
+	</insert>
+	
+	<!--21-03-28 19:03 양성룡 옵션 없을 시 장바구니 품목 조회  -->
+	<select id="cartSelectOneNoOption" parameterType="Cartlist" resultType="Cartlist">
+		SELECT *
+		FROM cartlist
+		WHERE member_no=#{memberNo} AND product_no=#{productNo}
+	</select>
+		
+	<delete id="delete" parameterType="int">
+		DELETE cartlist
+		WHERE no=#{no}
+	</delete>
+
+	
+</mapper>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="deliveryInfo">	
+	<insert id="insert" parameterType="DeliveryInfo">
+		INSERT INTO delivery_info(no,cart_no,receiver,address,address_detail,request,receive_date,regdate) 
+		VALUES(delivery_info_seq.nextval,#{cartNo},#{receiver},#{address},#{addressDetail},#{request},#{receiveDate},systimestamp)
+	</insert>
+	
+	<select id="selectCount" parameterType="int" resultType="int">
+		SELECT count(*)
+		FROM delivery_info
+		WHERE cart_no = #{no}
+	</select>
+	
+	<select id="selectDelivery" parameterType="int" resultType="DeliveryInfo">
+		SELECT no,cart_no cartNo,receiver,address,address_detail addressDetail,request,receive_date receiveDate,regdate
+		FROM delivery_info
+		WHERE cart_no = #{cartNo}
+	</select>
+	
+	<delete id="delete" parameterType="int">
+		DELETE delivery_info
+		WHERE cart_no = #{cartNo}
+	</delete>
+	
+</mapper>
+

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orderProd">	
+	<insert id="InsertOrder" parameterType="OrderProd">
+		INSERT INTO ORDER_PROD(no,receiver,address,address_detail,request,receive_date,count,delivery_state,product_no,option_no,payment_no,regdate)
+		VALUES(order_prod_seq.nextval,#{receiver},#{address},#{addressDetail},#{request},#{receiveDate},#{count},'O',#{productNo},#{optionNo},#{paymentNo},systimestamp)
+	</insert>
+	<select id="selectTotal" resultType="int">
+	SELECT count(*)
+	FROM(SELECT prodImg, receiver, address, addressDetail, prodName, prodOptName, delState, waybill, regdate, rownum r
+		FROM(SELECT p.represent_img prodImg, receiver, address, address_detail addressDetail, p.name prodName, po.name prodOptName, delivery_state delState, waybill, regdate
+			FROM order_prod op,
+				(SELECT no, name, represent_img
+				FROM product) p,
+				(SELECT no, name
+				FROM prod_option) po
+			WHERE op.product_no = p.no
+			AND op.option_no = po.no
+			ORDER BY regdate DESC))
+	</select>
+	<select id="selectOrderProdList" parameterType="PageVO" resultType="OrderProd">
+	SELECT no, prodImg, receiver, address, addressDetail, prodName, prodOptName, delState, waybill, regdate
+	FROM(SELECT no, prodImg, receiver, address, addressDetail, prodName, prodOptName, delState, waybill, regdate, rownum r
+		FROM(SELECT p.no no, p.represent_img prodImg, receiver, address, address_detail addressDetail, p.name prodName, po.name prodOptName, delivery_state delState, waybill, regdate
+			FROM order_prod op,
+				(SELECT no, name, represent_img
+				FROM product) p,
+				(SELECT no, name
+				FROM prod_option) po
+			WHERE op.product_no = p.no
+			AND op.option_no = po.no
+			ORDER BY regdate DESC))
+	WHERE r BETWEEN #{start} AND #{end}
+	</select>
+	<update id="updateDeliveryState" parameterType="OrderProd">
+		UPDATE order_prod
+		set delivery_state = 'W', waybill = #{waybill}
+		WHERE no = #{no}
+	</update>
+	<!-- 21-03-05 09:25 수정 -->
+	<select id="selectOrderProd" resultType="OrderProd"
+		parameterType="int">
+		SELECT p.represent_img representImg, p.price price,
+		p.name name,
+		o.waybill waybill, o.receive_date receiveDate
+		FROM order_prod o, product p
+		WHERE payment_no = #{paymentNo} AND p.no = o.product_no
+	</select>
+
+</mapper>
+

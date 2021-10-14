@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">	
+	
+	<select id="selectMemberList" parameterType="PageVO" resultType="Member">
+		SELECT regdate,reviewCount, reservationCount,saleCount,no,id,profile,email,banCount,banState
+		FROM(SELECT regdate,reviewCount, reservationCount,saleCount,no,id,profile,email,banCount,rownum r,banState
+			FROM(SELECT regdate,review_count reviewCount,reservation_count reservationCount,sale_count saleCount,no,id,profile,email, ban_count banCount,ban_state banState
+					FROM MEMBER
+					ORDER BY 1))
+		WHERE r BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="selectMemberTotal" resultType="int">
+		select count(no)
+		from member
+	</select>
+	
+	<select id="selectBanCount" parameterType="int" resultType="int">
+		select ban_count banCount
+		from member
+		where no = #{no}
+	</select>
+	
+	<update id="updateMemberBan" parameterType="int">
+		UPDATE member
+		SET ban_count = (SELECT BAN_COUNT+1 FROM member WHERE no=#{no}),ban_state='Y'
+		WHERE no = #{no}
+	</update>
+	
+	<update id="updateCancelBan" parameterType="int">
+		UPDATE member
+		SET ban_state='N'
+		WHERE no = #{no}
+	</update>
+	<select id="selectLogin" resultType="Member"
+		parameterType="Member">
+		SELECT no,id,name,sex,birth_date birthDate,email,profile,point
+		FROM member
+		WHERE id = #{id}
+		AND
+		password = #{password}
+	</select>
+	<select id="selectOne" resultType="Member" parameterType="int">
+		SELECT m.no no, id, name, email, profile, point, sale_count, deliveryState
+		FROM member m,
+			(SELECT op.no, op.delivery_state deliveryState, op.payment_no, p.member_no memberNo
+			FROM order_prod op,
+				(SELECT no, point_no, member_no
+				FROM payment)p
+			WHERE op.payment_no = p.no) opp
+		WHERE m.no = opp.memberNo
+		AND memberNo = #{memberNo}
+		AND rownum = 1
+	</select>
+	<select id="selectOneTotalCount" resultType="int" parameterType="int">
+		SELECT count(*)
+		FROM member m,
+			(SELECT op.no, op.delivery_state deliveryState, op.payment_no, p.member_no memberNo
+			FROM order_prod op,
+				(SELECT no, point_no, member_no
+				FROM payment)p
+			WHERE op.payment_no = p.no) opp
+		WHERE m.no = opp.memberNo
+		AND memberNo = #{memberNo}
+		AND deliveryState = 'W'
+	
+	</select>
+	<update id="updateEmail" parameterType="Member">
+		UPDATE member set email = #{email}
+		WHERE no = #{no}
+	</update>
+	<select id="selectId" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+		FROM member
+		WHERE id=#{id}
+	</select>
+	<insert id="insert" parameterType="Member">
+		insert into member(no,id,password,name,sex,birth_date,email,profile,point,sale_count,reservation_count,review_count,ban_count,ban_state,regdate) 
+		values(member_seq.nextval,#{id},#{password},#{name},#{sex},#{birthDate},#{email},'default.jpg',0,0,0,0,0,'N',systimestamp)
+	</insert>
+	<select id="selectLoginByEmail" parameterType="Member" resultType="Member">
+		SELECT 	no,id,password,name,sex,birth_date birthDate,
+				email,profile,point,sale_count saleCount,
+				reservation_count reservationCount,review_count reviewCount,
+				ban_count banCount,ban_state banState, regdate
+		FROM member
+		WHERE id=#{id} AND email=#{email}
+	</select>
+	<update id="updatePassword" parameterType="Member">
+		UPDATE member 
+		SET password=#{password}
+		WHERE id=#{id}
+	</update>
+
+</mapper>
+
